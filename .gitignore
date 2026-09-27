@@ -72,7 +72,8 @@ releases/
 
 # generated documentation graphs
 # > D2 HTML twins are local render aids; the committed artefact is the SVG twin
-**/graph/html/
+# > the globstar covers a twin under `html/` and one rendered beside its source
+**/graph/**/*.html
 
 # consumer-only config and agent symlinks
 /.agents
