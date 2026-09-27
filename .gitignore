@@ -3,10 +3,10 @@
 # # comment
 #   Comments begin with #; escape it as \# when matching a literal #.
 #
-# example.ts
+# example.txt
 #   Without /, the pattern matches at any directory level.
 #
-# /example.ts
+# /example.txt
 #   A leading / anchors the pattern to this repository root.
 #
 # example/
@@ -15,19 +15,19 @@
 #   - <symlink>/ would match the directory content
 #   - <symlink> would only match the symlink itself
 #
-# *.vsix
-#   * matches any characters except /. This matches *.vsix at any level.
+# *.tmp
+#   * matches any characters except /. This matches *.tmp at any level.
 #
 # a/**/b
 #   ** matches zero or more directories, so this matches a/b and a/x/y/b.
 #
-# /**.vsix
-#   This is root-anchored and is not equivalent to *.vsix.
+# /**.tmp
+#   This is root-anchored and is not equivalent to *.tmp.
 #
 # ?.tmp and [abc].tmp
 #   ? matches one character; [abc] matches one listed character.
 #
-# !example.ts
+# !example.txt
 #   ! re-includes a path. Rules are applied top to bottom, so order matters.
 #
 # output/*
@@ -38,7 +38,7 @@
 #   Blacklist
 #
 
-# global conventions
+# Global Conventions
 # > a leading dot and a leading underscore are ignored everywhere; the whitelist
 # > below re-includes the paths a repository commits on purpose
 .*
@@ -60,20 +60,37 @@ releases/
 
 # runtime output
 # > ignore any root cache directories
+# > keep the output directory but not its content
 # > ignore the shared storage mount, which holds data outside the repository
 /*cache*
-!/logo.png
+/output/*
 /storage
 
 # tooling output files
+.eslintcache
+*.egg-info
 *.log
 *.tsbuildinfo
-.eslintcache
+*nbqa*.py
 
 # generated documentation graphs
 # > D2 HTML twins are local render aids; the committed artefact is the SVG twin
-# > the globstar covers a twin under `html/` and one rendered beside its source
-**/graph/**/*.html
+**/graph/html/
+
+# root local config files
+# > `cspell.config.yaml` is a link a consumer receives from its base, so it must
+# > stay ignored; a repository that commits its own copy re-includes it below the
+# > repo-specific boundary
+/cspell.config.yaml
+
+# root folders for tooling
+/log/
+/build/
+/dist/
+/Formula/
+/report/
+/temp/
+/tmp/
 
 # consumer-only config and agent symlinks
 /.agents
@@ -84,26 +101,39 @@ releases/
 /.github/agents
 /.mcp.json
 /AGENTS.md
-
-# porter-materialised tool links and scratch space
-/tmp/
-
+# > the claude harness repeats `skills`; no trailing slash, which would make
+# > the rule directory-only and leave the symlink destination trackable
+harnesses/claude/skills
 
 #
 #   Whitelist
 #
 
-# allow __ module paths (e.g. __tests__/, __mocks__/); a single _ stays ignored
+# allow __ module paths (e.g. __init__.py, __tests__/, __fixtures__/); a single
+# _ stays ignored
+!__*.*
 !__*/
+
+# keep the bytecode cache ignored: the `_*` blacklist covers it, and the
+# directory negation above would otherwise expose every `__pycache__`
+__pycache__/
 
 # allow common Git metadata files
 # > !.git* also matches .git, but git hard-codes skipping the .git dir
 !.git*
 
-# allow config files a consumer receives as copies rather than symlinks
+# allow ci required config folders
+!/.ci/
+!/.infra/
+
+# allow ci required config files
+!/.coveragerc
+!/.env-*template*
 !/.node-version
 !/.npmrc
-!/.pre-commit-config.yaml
+!/.python-version
+
+# allow config files a consumer receives as copies rather than symlinks
 !/.prettierignore
 !/.prettierrc.json
 
@@ -117,21 +147,18 @@ releases/
 #   Exceptions
 #
 
-# Serena defect workaround: `gather_source_files` walks with followlinks=True
-# and matches with pathspec, not git, where a `/dir/` negation un-ignores the
-# whole subtree. `!/.agents/` above therefore re-includes this self-link unless
-# this rule is the last match; without it the walk descends the loop to the
-# symlink limit (ELOOP on open) and re-enumerates the shared tree once per
-# level. git needs no such rule, and the link cannot be deleted because porter
-# recreates it.
+# Serena defect workaround
+# > `gather_source_files` walks with followlinks=True and matches with pathspec,
+# > not git, so `!/.agents/` above un-ignores this self-link subtree; this rule
+# > must be the last match or the walk hits ELOOP and re-enumerates the shared
+# > tree once per level. Porter recreates the link, so it cannot be deleted.
 .agents/.agents
 
-# File-walker workaround: the `!.git*` whitelist above keeps `.gitignore`,
-# `.gitattributes`, and `.gitkeep` trackable under `.*`, but walkers that read
-# gitignore files as their ignore source (ripgrep, VS Code search, fd) also
-# un-hide real `.git` directories with it; git itself hard-codes skipping
-# `.git` and needs no rule. This re-ignores every repository's object store
-# and must stay the last match for those paths.
+# File-walker workaround
+# > `!.git*` above keeps `.gitignore`, `.gitattributes`, and `.gitkeep` trackable
+# > under `.*`, but walkers that read gitignore files as their ignore source
+# > (ripgrep, VS Code search, fd) also un-hide real `.git` stores with it; git
+# > itself hard-codes skipping `.git`, so this must stay the last match.
 .git/
 
 #
