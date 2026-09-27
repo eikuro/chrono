@@ -62,6 +62,7 @@ releases/
 # > ignore any root cache directories
 # > ignore the shared storage mount, which holds data outside the repository
 /*cache*
+!/logo.png
 /storage
 
 # tooling output files
@@ -69,12 +70,17 @@ releases/
 *.tsbuildinfo
 .eslintcache
 
+# generated documentation graphs
+# > D2 HTML twins are local render aids; the committed artefact is the SVG twin
+**/graph/html/
+
 # consumer-only config and agent symlinks
 /.agents
 /.claude
 /.codex
 /.github/copilot-instructions.md
 /.github/hooks
+/.github/agents
 /.mcp.json
 /AGENTS.md
 
