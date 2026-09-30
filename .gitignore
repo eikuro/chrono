@@ -35,12 +35,13 @@ _*
 ## tooling output files
 # > D2 twins are local render aids; the committed artefact is the D2 source
 *.log
-docs/**/*.html
-docs/**/*.svg
+**/graph/**/*.html
+**/graph/**/*.svg
 
 ## consumer config symlinks
 # > repositories that own real copies re-include them in Repo-specific Entries
 /cspell.config.yaml
+/justfile
 
 ## consumer agent symlinks
 # > .* symlinks already ignored
@@ -48,6 +49,15 @@ docs/**/*.svg
 /.github/agents
 /.github/copilot-instructions.md
 harnesses/claude/skills
+
+## JavaScript-specific Blacklist
+*.tsbuildinfo
+.eslintcache
+/node_modules/
+
+## vscode extension blacklist
+*.vsix
+.vscode-test/
 
 #
 ##   Whitelist
@@ -76,13 +86,6 @@ harnesses/claude/skills
 !/.agents/
 !/.vscode/
 
-## JavaScript-specific Blacklist
-/node_modules/
-.eslintcache
-*.tsbuildinfo
-## vscode extension blacklist
-.vscode-test/
-*.vsix
 ## JavaScript-specific Whitelist
 !/.node-version
 !/.npmrc

@@ -3,49 +3,51 @@
 #
 # component metadata
 #
+type: template
 private: true
+
+github: "eikuro"
+name: chrono
+description: Engineering blog.
 
 languages:
   - markdown
   - typescript
 
-name: chrono
-type: template
-description: Engineering blog.
+pipeline: .github/workflows/ci.yml
 
-github: eikuro
-
-ci: ""
+agents: ../.agents
 
 #
 # component repo config
 #
 
-config: ../jsmap
+# `pnpm run check` runs prettier in CI, and the workflow checks out this
+# repository alone — with no base beside it, Porter cannot re-materialise what
+# the gate reads — so those files stay copied and tracked. Every other shared
+# config file is linked locally and untracked.
+config:
+  base: ../jsmap
 
-# config file declaration
+  local:
+    - .cspell
+    - .editorconfig
+    - .markdownlint.yaml
+    - .vscode
+    - cspell.config.yaml
 
-copy:
-  - .github/workflows/ci.yml
-  - .gitattributes
-  - .node-version
-  - .npmrc
-  - .prettierignore
-  - .prettierrc.json
+  # the key's presence — not its content — registers .gitignore as a managed
+  # output, so the shared rules above the `# Repo-specific Entries` boundary
+  # keep refreshing from jsmap; entries below that boundary survive
+  # `porter config` verbatim, so a rule declared both here and below is
+  # appended twice — keep each rule in exactly one place
+  .gitignore: []
 
-symlink:
-  - .cspell
-  - .editorconfig
-  - .markdownlint.yaml
-  - .vscode
-  - cspell.config.yaml
+  .gitattributes: []
 
-agents: ../.agents
-
-# repo local customization
-# > the key's presence — not its content — registers .gitignore as a managed
-# > output, so the shared rules above the `# Repo-specific Entries` boundary
-# > keep refreshing from pymap; entries below that boundary survive
-# > `porter config` verbatim, so a rule declared both here and below is
-# > appended twice — keep each rule in exactly one place.
-.gitignore: []
+  # read by the CI gate, not by an editor
+  .github/workflows/ci.yml: []
+  .node-version: []
+  .npmrc: []
+  .prettierignore: []
+  .prettierrc.yaml: []
