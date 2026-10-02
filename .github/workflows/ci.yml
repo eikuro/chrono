@@ -12,12 +12,70 @@ permissions:
 jobs:
   check:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: consumer
     steps:
       - uses: actions/checkout@v6
+        with:
+          path: consumer
+          persist-credentials: false
+
+      - name: Validate config repository access
+        env:
+          BASES_TOKEN: ${{ secrets.BASES_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$BASES_TOKEN" ]]; then
+            echo "::error::Set BASES_TOKEN with read access to eikuro/.agents, eikuro/jsmap, and eikuro/porter."
+            exit 1
+          fi
+
+      - name: Check out Map
+        uses: actions/checkout@v6
+        with:
+          repository: eikuro/map
+          path: map
+          persist-credentials: false
+
+      - name: Check out JSMap
+        uses: actions/checkout@v6
+        with:
+          repository: eikuro/jsmap
+          token: ${{ secrets.BASES_TOKEN }}
+          path: jsmap
+          persist-credentials: false
+
+      - name: Check out the agent tree
+        uses: actions/checkout@v6
+        with:
+          repository: eikuro/.agents
+          token: ${{ secrets.BASES_TOKEN }}
+          path: .agents
+          persist-credentials: false
+
+      - name: Check out Porter
+        uses: actions/checkout@v6
+        with:
+          repository: eikuro/porter
+          token: ${{ secrets.BASES_TOKEN }}
+          path: porter
+          persist-credentials: false
+
+      - uses: astral-sh/setup-uv@v5
+      - name: Install porter
+        run: uv tool install --python 3.12 ../porter
+
+      - name: Materialise the ci-class config files
+        run: porter config --ci
+
       - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: consumer/package.json
       - uses: actions/setup-node@v7
         with:
           cache: pnpm
-          node-version-file: .node-version
+          cache-dependency-path: consumer/pnpm-lock.yaml
+          node-version-file: consumer/.node-version
       - run: pnpm install --frozen-lockfile
       - run: pnpm run check

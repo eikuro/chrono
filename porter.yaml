@@ -3,7 +3,7 @@
 #
 # component metadata
 #
-type: template
+type: docs
 private: true
 
 github: "eikuro"
@@ -22,32 +22,42 @@ agents: ../.agents
 # component repo config
 #
 
-# `pnpm run check` runs prettier in CI, and the workflow checks out this
-# repository alone — with no base beside it, Porter cannot re-materialise what
-# the gate reads — so those files stay copied and tracked. Every other shared
-# config file is linked locally and untracked.
+# Every shared config file is a link: locally it points into `../jsmap`, and a
+# clean checkout materialises a real copy through `--ci`. The workflow checks
+# the bases out beside this repository and runs `porter config --ci` before the
+# gates read anything, so nothing here is committed as a real file.
 config:
   base: ../jsmap
 
+  # linked locally; a clean checkout materialises real copies with --ci — these
+  # are the files `setup-node`, `pnpm install`, and `prettier --check` read
+  ci:
+    - .node-version
+    - .npmrc
+    - .prettierignore
+    - .prettierrc.yaml
+
+  # linked locally, untracked: only a developer's editor or a local tool reads
+  # these, so a clean checkout needs none of them
   local:
-    - .cspell
     - .editorconfig
     - .markdownlint.yaml
     - .vscode
     - cspell.config.yaml
 
-  # the key's presence — not its content — registers .gitignore as a managed
-  # output, so the shared rules above the `# Repo-specific Entries` boundary
-  # keep refreshing from jsmap; entries below that boundary survive
-  # `porter config` verbatim, so a rule declared both here and below is
-  # appended twice — keep each rule in exactly one place
-  .gitignore: []
+  # `.gitignore` is a managed output in template mode: the shared body above
+  # the `# Repo-specific Entries` boundary refreshes from jsmap, while the
+  # entries below that boundary are this repository's own — declared here, so
+  # the whole file is reproducible from this manifest alone. The boundary is
+  # declared with an empty tail because no shared config file is a real copy
+  # here, so there is nothing to re-include below it.
+  .gitignore: | #ini
+    #
+    ##   Repo-specific Entries
+    #
 
   .gitattributes: []
 
-  # read by the CI gate, not by an editor
+  # the workflow file stays a copied key, never a `ci:` entry: a pipeline
+  # cannot materialise the file that starts it
   .github/workflows/ci.yml: []
-  .node-version: []
-  .npmrc: []
-  .prettierignore: []
-  .prettierrc.yaml: []
