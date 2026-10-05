@@ -3,8 +3,8 @@
 #
 # component metadata
 #
-type: docs
 private: true
+type: docs
 
 github: "eikuro"
 name: chrono
@@ -14,7 +14,7 @@ languages:
   - markdown
   - typescript
 
-pipeline: .github/workflows/ci.yml
+cicd: .github/workflows/ci.yml
 
 agents: ../.agents
 
@@ -31,7 +31,7 @@ config:
 
   # linked locally; a clean checkout materialises real copies with --ci — these
   # are the files `setup-node`, `pnpm install`, and `prettier --check` read
-  ci:
+  cicd:
     - .node-version
     - .npmrc
     - .prettierignore

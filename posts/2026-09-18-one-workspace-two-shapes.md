@@ -41,11 +41,11 @@ them by hand and you rebuild the monorepo's worst property — copies that drift
 
 Three repositories hold the shared material, each file written once:
 
-| Shared surface                                                                                                                                            | Authored in                           |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
-| Python project configuration — `ruff.toml`, `pyrightconfig.json`, `pytest.ini`, `.coveragerc`, canonical `pyproject.toml` groups — and the `just` recipes | `pymap/`                              |
-| Node.js and VS Code extension configuration, including the editor settings fragments                                                                      | `jsmap/`                              |
-| Agent instructions, skills, workflows, hooks, and MCP wiring                                                                                              | [`.agents/`](../../.agents/README.md) |
+| Shared surface | Authored in |
+| --- | --- |
+| Python project configuration — `ruff.toml`, `pyrightconfig.json`, `pytest.ini`, `.coveragerc`, canonical `pyproject.toml` groups — and the `just` recipes | `pymap/` |
+| Node.js and VS Code extension configuration, including the editor settings fragments | `jsmap/` |
+| Agent instructions, skills, workflows, hooks, and MCP wiring | [`.agents/`](../../.agents/README.md) |
 
 None of them is a runtime dependency. A consumer never imports the template,
 and nothing in production requires the template checkout to exist; the
@@ -66,14 +66,14 @@ Ownership is one-way: a change intended for every repository goes in the
 template; a change for one repository goes in its manifest. Generated output is
 never hand-edited.
 
-| Operation            | Typical outputs                                                                                                                  | Why it is the right shape                                                                                                                                                               |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `symlink`            | `.editorconfig`, `.cspell/`, `cspell.config.yaml`, `.markdownlint.yaml`, `.pre-commit-config.yaml`, `.vscode/`                   | The bytes are identical everywhere and should stay one physical copy; a dictionary entry or a settings change lands in every repository at once.                                        |
-| `copy`               | `ruff.toml`, `pyrightconfig.json`, `pytest.ini`, `.coveragerc`, `.python-version`, `Dockerfile`, `.gitattributes`                | The destination must be a real file. Git never reads a symlinked `.gitattributes`, and a clean checkout should carry the materialised form.                                             |
-| `merge`              | `pyproject.toml`                                                                                                                 | Local values (`uv add` results) survive, the template's canonical groups propagate, and an explicit overlay wins ([structured merge](../../porter/specs/FEATURES.md#structured-merge)). |
-| `append`             | Stable text blocks, added exactly once                                                                                           | A consumer-owned file needs one managed region and no rewrites.                                                                                                                         |
-| Managed `.gitignore` | Template rules above `# Repo-specific Entries`, consumer rules below; Porter records its symlink destinations below the boundary | One rule has one home — shared or repository-specific ([managed `.gitignore`](../../porter/specs/FEATURES.md#managed-gitignore-updates)).                                               |
-| `agents`             | `AGENTS.md`, `.claude`, `.codex`, `.mcp.json`, `.github/copilot-instructions.md`, `tmp/serena`, `tmp/codebase-memory`            | The shared agent tree is mounted, not copied, so one edit lands everywhere ([dedicated agent links](../../porter/specs/FEATURES.md#dedicated-agent-links)).                             |
+| Operation | Typical outputs | Why it is the right shape |
+| --- | --- | --- |
+| `symlink` | `.editorconfig`, `.cspell/`, `cspell.config.yaml`, `.markdownlint.yaml`, `.pre-commit-config.yaml`, `.vscode/` | The bytes are identical everywhere and should stay one physical copy; a dictionary entry or a settings change lands in every repository at once. |
+| `copy` | `ruff.toml`, `pyrightconfig.json`, `pytest.ini`, `.coveragerc`, `.python-version`, `Dockerfile`, `.gitattributes` | The destination must be a real file. Git never reads a symlinked `.gitattributes`, and a clean checkout should carry the materialised form. |
+| `merge` | `pyproject.toml` | Local values (`uv add` results) survive, the template's canonical groups propagate, and an explicit overlay wins ([structured merge](../../porter/specs/FEATURES.md#structured-merge)). |
+| `append` | Stable text blocks, added exactly once | A consumer-owned file needs one managed region and no rewrites. |
+| Managed `.gitignore` | Template rules above `# Repo-specific Entries`, consumer rules below; Porter records its symlink destinations below the boundary | One rule has one home — shared or repository-specific ([managed `.gitignore`](../../porter/specs/FEATURES.md#managed-gitignore-updates)). |
+| `agents` | `AGENTS.md`, `.claude`, `.codex`, `.mcp.json`, `.github/copilot-instructions.md`, `tmp/serena`, `tmp/codebase-memory` | The shared agent tree is mounted, not copied, so one edit lands everywhere ([dedicated agent links](../../porter/specs/FEATURES.md#dedicated-agent-links)). |
 
 The links are materialised on each machine and are not committed: a link
 describes local layout, and its target lives in the template checkout. What a
@@ -95,13 +95,13 @@ open, the servers follow.
 
 ## The two shapes
 
-|                       | Parent folder open                                                                                                                   | One member open                                  |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------ |
-| VS Code root          | The workspace directory, with every repository as a directory                                                                        | The repository itself                            |
-| Search and references | One index over every repository; Copilot `@`-references reach each member                                                            | One component                                    |
-| Tooling               | Shared links resolve once at the root; the repeated mounts inside members are hidden from the Explorer, search, and the file watcher | The same link files resolve for this repository  |
-| Runtime               | No workspace-level environment; each member keeps its own `.venv` and lock                                                           | This repository's `.venv` and lock               |
-| Agent scope           | The whole workspace graph, for work that crosses a contract                                                                          | The component — its graph, its checks, its tests |
+| | Parent folder open | One member open |
+| --- | --- | --- |
+| VS Code root | The workspace directory, with every repository as a directory | The repository itself |
+| Search and references | One index over every repository; Copilot `@`-references reach each member | One component |
+| Tooling | Shared links resolve once at the root; the repeated mounts inside members are hidden from the Explorer, search, and the file watcher | The same link files resolve for this repository |
+| Runtime | No workspace-level environment; each member keeps its own `.venv` and lock | This repository's `.venv` and lock |
+| Agent scope | The whole workspace graph, for work that crosses a contract | The component — its graph, its checks, its tests |
 
 Both shapes load the same editor configuration: a member's `.vscode` is itself
 a link to the shared settings inventory, and the parent root composes the same

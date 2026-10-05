@@ -15,8 +15,8 @@ Read Chrono online at <https://organisation.github.io/chrono/>.
 
 Posts are one Markdown file each under `posts/`.
 
-| Date       | Post                                                                      | Summary                                                                                                                                                                   |
-| ---------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Date | Post | Summary |
+| --- | --- | --- |
 | 2026-09-18 | [One workspace, two shapes](posts/2026-09-18-one-workspace-two-shapes.md) | How shared templates, Porter materialisation, and relative symlinks let this family of repositories open as one workspace or as any single member with identical tooling. |
 
 ## Repository Notes
