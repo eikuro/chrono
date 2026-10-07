@@ -9,6 +9,8 @@ type: docs
 github: "eikuro"
 name: chrono
 description: Engineering blog.
+maintainer:
+  - Zhenyu Lin <zhenyu.lin@opbi.org>
 
 languages:
   - markdown
@@ -22,12 +24,12 @@ agents: ../.agents
 # component repo config
 #
 
-# Every shared config file is a link: locally it points into `../jsmap`, and a
+# Every shared config file is a link: locally it points into `../tabjs`, and a
 # clean checkout materialises a real copy through `--ci`. The workflow checks
 # the bases out beside this repository and runs `porter config --ci` before the
 # gates read anything, so nothing here is committed as a real file.
 config:
-  base: ../jsmap
+  base: ../tabjs
 
   # linked locally; a clean checkout materialises real copies with --ci — these
   # are the files `setup-node`, `pnpm install`, and `prettier --check` read
@@ -46,7 +48,7 @@ config:
     - cspell.config.yaml
 
   # `.gitignore` is a managed output in template mode: the shared body above
-  # the `# Repo-specific Entries` boundary refreshes from jsmap, while the
+  # the `# Repo-specific Entries` boundary refreshes from tabjs, while the
   # entries below that boundary are this repository's own — declared here, so
   # the whole file is reproducible from this manifest alone. The boundary is
   # declared with an empty tail because no shared config file is a real copy

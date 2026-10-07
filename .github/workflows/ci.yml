@@ -27,23 +27,23 @@ jobs:
         run: |
           set -euo pipefail
           if [[ -z "$BASES_TOKEN" ]]; then
-            echo "::error::Set BASES_TOKEN with read access to eikuro/.agents, eikuro/jsmap, and eikuro/porter."
+            echo "::error::Set BASES_TOKEN with read access to eikuro/.agents, eikuro/tabjs, and eikuro/porter."
             exit 1
           fi
 
-      - name: Check out Map
+      - name: Check out Tab
         uses: actions/checkout@v6
         with:
-          repository: eikuro/map
-          path: map
+          repository: eikuro/tab
+          path: tab
           persist-credentials: false
 
-      - name: Check out JSMap
+      - name: Check out TabJS
         uses: actions/checkout@v6
         with:
-          repository: eikuro/jsmap
+          repository: eikuro/tabjs
           token: ${{ secrets.BASES_TOKEN }}
-          path: jsmap
+          path: tabjs
           persist-credentials: false
 
       - name: Check out the agent tree

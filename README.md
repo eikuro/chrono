@@ -22,7 +22,7 @@ Posts are one Markdown file each under `posts/`.
 ## Repository Notes
 
 - This repository is a Porter consumer like its siblings: `porter.yaml`
-  declares `config: ../jsmap` and links the shared spelling, lint, editor, and
+  declares `config: ../tabjs` and links the shared spelling, lint, editor, and
   VS Code configuration; `agents: ../.agents` mounts the shared agent tree.
   Materialise with `porter config`; check for drift with `porter config --dry`.
 - Cross-repository links in posts assume the workspace checkout, where
