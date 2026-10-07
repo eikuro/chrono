@@ -50,7 +50,7 @@ Three repositories hold the shared material, each file written once:
 None of them is a runtime dependency. A consumer never imports the template,
 and nothing in production requires the template checkout to exist; the
 distribution test is that each repository can be cloned, installed, tested, and
-released alone ([repository boundaries](../../charter/WORKSPACE.md#repository-boundaries)).
+released alone ([repository boundaries](../../atlas/WORKSPACE.md#repository-boundaries)).
 The template is a build-time input, provided by the operator as a local
 checkout beside its consumers.
 
@@ -115,7 +115,7 @@ means one meaning for every path, glob, and configuration lookup; a multi-root
 file gives each root its own meaning. The five concrete failures that rule out
 multi-root — glob anchoring, Copilot references, agent-configuration loading,
 gitignore-based hiding, and extension reloads — are recorded in the
-[workspace decision](../../charter/DECISIONS.md#never-open-workspace-as-a-multi-root-vs-code-workspace).
+[workspace decision](../../atlas/DECISIONS.md#never-open-workspace-as-a-multi-root-vs-code-workspace).
 
 The switch between shapes is just which folder opens. Nothing inside a
 repository changes, because nothing was ever configured for a window.
