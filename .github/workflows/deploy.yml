@@ -21,10 +21,14 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v4
+      # `.node-version` is a workspace link into `../tabjs`, so a checkout of
+      # this repository alone carries a dangling symlink and cannot be read.
+      # `package.json` is committed here, and setup-node reads `engines.node`
+      # from it, which is the same major the link points at.
       - uses: actions/setup-node@v7
         with:
           cache: pnpm
-          node-version-file: .node-version
+          node-version-file: package.json
       - run: pnpm install --frozen-lockfile
       - run: pnpm run build
       - uses: actions/upload-pages-artifact@v3
