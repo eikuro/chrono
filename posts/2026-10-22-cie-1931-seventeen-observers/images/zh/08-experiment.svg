@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700" role="img">
+<rect width="1200" height="700" fill="#ffffff"/>
+<text x="52" y="66" font-family="IBM Plex Sans, Helvetica Neue, Arial, PingFang SC, Hiragino Sans GB, Noto Sans SC, sans-serif" font-size="31" font-weight="600" fill="#202522" text-anchor="start">颜色匹配实验</text>
+<text x="52" y="102" font-family="IBM Plex Sans, Helvetica Neue, Arial, PingFang SC, Hiragino Sans GB, Noto Sans SC, sans-serif" font-size="20" font-weight="400" fill="#6b746f" text-anchor="start">调整三个原色，直到两半无法分辨。</text>
+<circle cx="300" cy="330" r="150" fill="#f7f7f6" stroke="#202522" stroke-width="2"/>
+<path d="M 300 180 A 150 150 0 0 1 300 480 Z" fill="#d8d3c6"/>
+<path d="M 300 180 A 150 150 0 0 0 300 480 Z" fill="#e8e4da"/>
+<line x1="300" y1="180" x2="300" y2="480" stroke="#202522" stroke-width="1.6"/>
+<text x="248" y="338" font-family="IBM Plex Sans, Helvetica Neue, Arial, PingFang SC, Hiragino Sans GB, Noto Sans SC, sans-serif" font-size="19" font-weight="400" fill="#202522" text-anchor="middle">测试场</text>
+<text x="358" y="338" font-family="IBM Plex Sans, Helvetica Neue, Arial, PingFang SC, Hiragino Sans GB, Noto Sans SC, sans-serif" font-size="19" font-weight="400" fill="#202522" text-anchor="middle">混合场</text>
+<text x="300" y="154" font-family="IBM Plex Sans, Helvetica Neue, Arial, PingFang SC, Hiragino Sans GB, Noto Sans SC, sans-serif" font-size="21" font-weight="600" fill="#202522" text-anchor="middle">双半视场，2 度</text>
+<text x="300" y="524" font-family="IBM Plex Sans, Helvetica Neue, Arial, PingFang SC, Hiragino Sans GB, Noto Sans SC, sans-serif" font-size="19" font-weight="400" fill="#6b746f" text-anchor="middle">判断“看起来一样”，就是测量。</text>
+<circle cx="640" cy="220" r="26" fill="#c9553f"/>
+<text x="684" y="218" font-family="IBM Plex Mono, SFMono-Regular, Menlo, monospace" font-size="19" font-weight="400" fill="#6b746f" text-anchor="start">630 nm</text>
+<line x1="700" y1="220" x2="760" y2="220" stroke="#e2e6e3" stroke-width="2"/>
+<line x1="580" y1="220" x2="606" y2="220" stroke="#e2e6e3" stroke-width="2"/>
+<circle cx="640" cy="316" r="26" fill="#2f8f5b"/>
+<text x="684" y="314" font-family="IBM Plex Mono, SFMono-Regular, Menlo, monospace" font-size="19" font-weight="400" fill="#6b746f" text-anchor="start">530 nm</text>
+<line x1="700" y1="316" x2="760" y2="316" stroke="#e2e6e3" stroke-width="2"/>
+<line x1="580" y1="316" x2="606" y2="316" stroke="#e2e6e3" stroke-width="2"/>
+<circle cx="640" cy="412" r="26" fill="#315cce"/>
+<text x="684" y="410" font-family="IBM Plex Mono, SFMono-Regular, Menlo, monospace" font-size="19" font-weight="400" fill="#6b746f" text-anchor="start">460 nm</text>
+<line x1="700" y1="412" x2="760" y2="412" stroke="#e2e6e3" stroke-width="2"/>
+<line x1="580" y1="412" x2="606" y2="412" stroke="#e2e6e3" stroke-width="2"/>
+<text x="640" y="190" font-family="IBM Plex Sans, Helvetica Neue, Arial, PingFang SC, Hiragino Sans GB, Noto Sans SC, sans-serif" font-size="21" font-weight="600" fill="#202522" text-anchor="middle">三个原色</text>
+<line x1="760" y1="268" x2="850" y2="330" stroke="#6b746f" stroke-width="1.8" stroke-dasharray="6 4"/>
+<line x1="760" y1="364" x2="850" y2="330" stroke="#6b746f" stroke-width="1.8" stroke-dasharray="6 4"/>
+<line x1="760" y1="460" x2="850" y2="330" stroke="#6b746f" stroke-width="1.8" stroke-dasharray="6 4"/>
+<circle cx="870" cy="330" r="44" fill="#e8e4da" stroke="#202522" stroke-width="2"/>
+<text x="1010" y="300" font-family="IBM Plex Sans, Helvetica Neue, Arial, PingFang SC, Hiragino Sans GB, Noto Sans SC, sans-serif" font-size="21" font-weight="600" fill="#202522" text-anchor="middle">观察者报告</text>
+<text x="1010" y="338" font-family="IBM Plex Mono, SFMono-Regular, Menlo, monospace" font-size="22" font-weight="400" fill="#315cce" text-anchor="middle">L  M  S</text>
+<text x="1010" y="372" font-family="IBM Plex Sans, Helvetica Neue, Arial, PingFang SC, Hiragino Sans GB, Noto Sans SC, sans-serif" font-size="19" font-weight="400" fill="#6b746f" text-anchor="middle">相等</text>
+<text x="90" y="640" font-family="IBM Plex Sans, Helvetica Neue, Arial, PingFang SC, Hiragino Sans GB, Noto Sans SC, sans-serif" font-size="19" font-weight="400" fill="#6b746f" text-anchor="start">反复调整，直到两半无法分辨。</text>
+</svg>

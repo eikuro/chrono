@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600" role="img">
+<rect width="1200" height="600" fill="#ffffff"/>
+<text x="52" y="66" font-family="IBM Plex Sans, Helvetica Neue, Arial, PingFang SC, Hiragino Sans GB, Noto Sans SC, sans-serif" font-size="31" font-weight="600" fill="#202522" text-anchor="start">1931 数据到哪里为止</text>
+<text x="52" y="102" font-family="IBM Plex Sans, Helvetica Neue, Arial, PingFang SC, Hiragino Sans GB, Noto Sans SC, sans-serif" font-size="20" font-weight="400" fill="#6b746f" text-anchor="start">均匀性是更晚的一层，锚定在同一个基点上。</text>
+<text x="110" y="294" font-family="IBM Plex Sans, Helvetica Neue, Arial, PingFang SC, Hiragino Sans GB, Noto Sans SC, sans-serif" font-size="21" font-weight="600" fill="#202522" text-anchor="start">xy 上的等步长</text>
+<text x="110" y="326" font-family="IBM Plex Sans, Helvetica Neue, Arial, PingFang SC, Hiragino Sans GB, Noto Sans SC, sans-serif" font-size="18" font-weight="400" fill="#6b746f" text-anchor="start">距离相等，差别不相等。</text>
+<text x="110" y="414" font-family="IBM Plex Sans, Helvetica Neue, Arial, PingFang SC, Hiragino Sans GB, Noto Sans SC, sans-serif" font-size="21" font-weight="600" fill="#202522" text-anchor="start">OKLab 上的等步长</text>
+<text x="110" y="446" font-family="IBM Plex Sans, Helvetica Neue, Arial, PingFang SC, Hiragino Sans GB, Noto Sans SC, sans-serif" font-size="18" font-weight="400" fill="#6b746f" text-anchor="start">距离相等，差别也相等。</text>
+<rect x="300" y="256" width="52" height="76" fill="rgb(255,54,54)" rx="2"/>
+<rect x="356" y="256" width="52" height="76" fill="rgb(255,59,91)" rx="2"/>
+<rect x="412" y="256" width="52" height="76" fill="rgb(255,65,121)" rx="2"/>
+<rect x="468" y="256" width="52" height="76" fill="rgb(255,72,150)" rx="2"/>
+<rect x="524" y="256" width="52" height="76" fill="rgb(255,81,181)" rx="2"/>
+<rect x="580" y="256" width="52" height="76" fill="rgb(255,92,217)" rx="2"/>
+<rect x="636" y="256" width="52" height="76" fill="rgb(247,103,255)" rx="2"/>
+<rect x="692" y="256" width="52" height="76" fill="rgb(196,98,255)" rx="2"/>
+<rect x="748" y="256" width="52" height="76" fill="rgb(141,95,255)" rx="2"/>
+<rect x="804" y="256" width="52" height="76" fill="rgb(54,92,255)" rx="2"/>
+<rect x="300" y="376" width="52" height="76" fill="rgb(5,36,130)" rx="2"/>
+<rect x="356" y="376" width="52" height="76" fill="rgb(18,54,148)" rx="2"/>
+<rect x="412" y="376" width="52" height="76" fill="rgb(32,71,166)" rx="2"/>
+<rect x="468" y="376" width="52" height="76" fill="rgb(47,88,185)" rx="2"/>
+<rect x="524" y="376" width="52" height="76" fill="rgb(62,105,203)" rx="2"/>
+<rect x="580" y="376" width="52" height="76" fill="rgb(77,122,222)" rx="2"/>
+<rect x="636" y="376" width="52" height="76" fill="rgb(93,139,241)" rx="2"/>
+<rect x="692" y="376" width="52" height="76" fill="rgb(109,157,255)" rx="2"/>
+<rect x="748" y="376" width="52" height="76" fill="rgb(126,175,255)" rx="2"/>
+<rect x="804" y="376" width="52" height="76" fill="rgb(143,193,255)" rx="2"/>
+<rect x="110" y="500" width="220" height="56" fill="#f1f2f1" stroke="#e2e6e3" stroke-width="1.5" rx="4"/>
+<text x="220" y="536" font-family="IBM Plex Mono, SFMono-Regular, Menlo, monospace" font-size="19" font-weight="400" fill="#202522" text-anchor="middle">1931 XYZ</text>
+<text x="110" y="578" font-family="IBM Plex Sans, Helvetica Neue, Arial, PingFang SC, Hiragino Sans GB, Noto Sans SC, sans-serif" font-size="17" font-weight="400" fill="#6b746f" text-anchor="start">测量</text>
+<rect x="380" y="500" width="220" height="56" fill="#f1f2f1" stroke="#e2e6e3" stroke-width="1.5" rx="4"/>
+<text x="490" y="536" font-family="IBM Plex Mono, SFMono-Regular, Menlo, monospace" font-size="19" font-weight="400" fill="#202522" text-anchor="middle">CIELAB 1976</text>
+<text x="380" y="578" font-family="IBM Plex Sans, Helvetica Neue, Arial, PingFang SC, Hiragino Sans GB, Noto Sans SC, sans-serif" font-size="17" font-weight="400" fill="#6b746f" text-anchor="start">均匀性</text>
+<rect x="650" y="500" width="220" height="56" fill="#f1f2f1" stroke="#e2e6e3" stroke-width="1.5" rx="4"/>
+<text x="760" y="536" font-family="IBM Plex Mono, SFMono-Regular, Menlo, monospace" font-size="19" font-weight="400" fill="#202522" text-anchor="middle">OKLab 2020</text>
+<text x="650" y="578" font-family="IBM Plex Sans, Helvetica Neue, Arial, PingFang SC, Hiragino Sans GB, Noto Sans SC, sans-serif" font-size="17" font-weight="400" fill="#6b746f" text-anchor="start">接口</text>
+<text x="700" y="536" font-family="IBM Plex Sans, Helvetica Neue, Arial, PingFang SC, Hiragino Sans GB, Noto Sans SC, sans-serif" font-size="26" font-weight="400" fill="#6b746f" text-anchor="middle">→</text>
+<text x="970" y="536" font-family="IBM Plex Sans, Helvetica Neue, Arial, PingFang SC, Hiragino Sans GB, Noto Sans SC, sans-serif" font-size="26" font-weight="400" fill="#6b746f" text-anchor="middle">→</text>
+<text x="110" y="596" font-family="IBM Plex Sans, Helvetica Neue, Arial, PingFang SC, Hiragino Sans GB, Noto Sans SC, sans-serif" font-size="18" font-weight="400" fill="#6b746f" text-anchor="start">每一层都由下一层导出，并始终锚定于它。</text>
+</svg>
