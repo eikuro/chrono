@@ -4,6 +4,12 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 
 type Post = CollectionEntry<'posts'>;
 
+const posts = await getCollection('posts');
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const postHref = (entry: Post) => `${base}/posts/${entry.id}/`;
+const languageName = (lang: string) => (lang === 'zh' ? '中文' : 'English');
+const languageOrder = (entry: Post) => (entry.data.lang === 'en' ? 0 : 1);
+
 export async function getStaticPaths() {
   const posts = await getCollection('posts');
 
@@ -17,13 +23,45 @@ export async function getStaticPaths() {
 
 const { post, rendered } = Astro.props;
 const { Content } = rendered;
+
+const variants = posts
+  .filter((entry: Post) => entry.data.translationKey === post.data.translationKey)
+  .sort((first: Post, second: Post) => languageOrder(first) - languageOrder(second));
+const alternates = variants.map((variant: Post) => ({
+  href: postHref(variant),
+  lang: variant.data.lang,
+}));
 ---
 
-<BaseLayout title={post.data.name} description={post.data.description}>
+<BaseLayout
+  title={post.data.name}
+  description={post.data.description}
+  lang={post.data.lang}
+  alternates={alternates}
+>
   <article class="post">
     <a class="back-link" href={`${import.meta.env.BASE_URL}`}>← All notes</a>
     <header class="post-header">
-      <p class="eyebrow">{post.data.type}</p>
+      <div class="post-top">
+        <p class="eyebrow">{post.data.tags[0] ?? post.data.type}</p>
+        {
+          variants.length > 1 && (
+            <nav class="language-switch" aria-label="Language">
+              {variants.map((variant: Post) =>
+                variant.id === post.id ? (
+                  <span class="language-current" aria-current="true" lang={variant.data.lang}>
+                    {languageName(variant.data.lang)}
+                  </span>
+                ) : (
+                  <a href={postHref(variant)} hreflang={variant.data.lang} lang={variant.data.lang}>
+                    {languageName(variant.data.lang)}
+                  </a>
+                ),
+              )}
+            </nav>
+          )
+        }
+      </div>
       <h1>{post.data.name}</h1>
       <div class="post-meta">
         <time datetime={post.data.date.toISOString()}>
@@ -67,6 +105,39 @@ const { Content } = rendered;
     font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
     text-transform: uppercase;
+  }
+
+  .post-top {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px 24px;
+    align-items: baseline;
+  }
+
+  .post-top > * {
+    margin: 0 0 16px;
+  }
+
+  .language-switch {
+    display: inline-flex;
+    gap: 14px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+  }
+
+  .language-switch a {
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .language-switch a:hover,
+  .language-switch a:focus-visible {
+    color: var(--signal);
+  }
+
+  .language-current {
+    color: var(--signal);
   }
 
   h1 {
@@ -127,6 +198,13 @@ const { Content } = rendered;
     background: var(--paper-deep);
     font-family: 'IBM Plex Mono', monospace;
     font-size: 0.85em;
+  }
+
+  .prose :global(img) {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 32px auto 12px;
   }
 
   .prose :global(pre) {

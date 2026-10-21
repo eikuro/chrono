@@ -17,10 +17,19 @@ Posts are one Markdown file each under `posts/`.
 
 | Date | Post | Summary |
 | --- | --- | --- |
+| 2026-10-22 | [Seventeen observers, one standard](posts/2026-10-22-cie-1931-seventeen-observers/en.md) | The 1931 CIE colour-matching experiment as a case study in compressing deep research into a small, durable interface. Also in [Chinese](posts/2026-10-22-cie-1931-seventeen-observers/zh.md). |
 | 2026-09-18 | [One workspace, two shapes](posts/2026-09-18-one-workspace-two-shapes.md) | How shared templates, Porter materialisation, and relative symlinks let this family of repositories open as one workspace or as any single member with identical tooling. |
 
 ## Repository Notes
 
+- A post is one Markdown file with a `translationKey`. Language variants of the
+  same work share that key and carry `lang: en` or `lang: zh`; the archive lists
+  one row per key and each variant links to its siblings. A post folder holds
+  its language files and its figures together, so relative image paths stay
+  local to the post.
+- A folder under `posts/` whose name starts with an underscore is staging
+  material: the collection loader skips it, so a raw draft cannot fail the
+  schema or reach the archive.
 - This repository is a Porter consumer like its siblings: `porter.yaml`
   declares `config: ../tabjs` and links the shared spelling, lint, editor, and
   VS Code configuration; `agents: ../.agents` mounts the shared agent tree.

@@ -4,9 +4,29 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 type Post = CollectionEntry<'posts'>;
 
-const posts = (await getCollection('posts')).sort(
-  (first: Post, second: Post) => second.data.date.valueOf() - first.data.date.valueOf(),
-);
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const postHref = (entry: Post) => `${base}/posts/${entry.id}/`;
+const languageOrder = (entry: Post) => (entry.data.lang === 'en' ? 0 : 1);
+
+// One row per work: language variants of the same post share a translation key,
+// so the archive lists each title once and links each language on its own.
+const posts = await getCollection('posts');
+const groups = new Map<string, Post[]>();
+
+for (const post of posts) {
+  const variants = groups.get(post.data.translationKey);
+  if (variants) {
+    variants.push(post);
+  } else {
+    groups.set(post.data.translationKey, [post]);
+  }
+}
+
+const works = [...groups.values()]
+  .map((variants: Post[]) =>
+    variants.sort((first: Post, second: Post) => languageOrder(first) - languageOrder(second)),
+  )
+  .sort((first: Post[], second: Post[]) => second[0].data.date.valueOf() - first[0].data.date.valueOf());
 ---
 
 <BaseLayout
@@ -29,27 +49,44 @@ const posts = (await getCollection('posts')).sort(
     </div>
     <div class="post-list">
       {
-        posts.map((post: Post, index: number) => (
-          <a class="post-card" href={`${import.meta.env.BASE_URL}/posts/${post.id}/`}>
-            <span class="post-number">{String(index + 1).padStart(2, '0')}</span>
-            <span class="post-copy">
-              <span class="post-meta">
-                <time datetime={post.data.date.toISOString()}>
-                  {post.data.date.toLocaleDateString('en-GB', {
-                    day: '2-digit',
-                    month: 'short',
-                    year: 'numeric',
-                  })}
-                </time>
-                <span>·</span>
-                <span>{post.data.type}</span>
-              </span>
-              <strong>{post.data.name}</strong>
-              <span class="post-description">{post.data.description}</span>
-            </span>
-            <span class="post-arrow" aria-hidden="true">↗</span>
-          </a>
-        ))
+        works.map((variants: Post[], index: number) => {
+          const primary = variants[0];
+
+          return (
+            <div class="post-card">
+              <span class="post-number">{String(index + 1).padStart(2, '0')}</span>
+              <div class="post-copy">
+                <span class="post-meta">
+                  <time datetime={primary.data.date.toISOString()}>
+                    {primary.data.date.toLocaleDateString('en-GB', {
+                      day: '2-digit',
+                      month: 'short',
+                      year: 'numeric',
+                    })}
+                  </time>
+                  <span>·</span>
+                  <span>{primary.data.tags[0] ?? primary.data.type}</span>
+                </span>
+                {variants.map((variant: Post, variantIndex: number) => (
+                  <a
+                    class={variantIndex === 0 ? 'post-title' : 'post-title post-title-alt'}
+                    href={postHref(variant)}
+                    hreflang={variant.data.lang}
+                    lang={variant.data.lang}
+                  >
+                    <span>{variant.data.name}</span>
+                    {variantIndex === 0 && (
+                      <span class="post-arrow" aria-hidden="true">
+                        ↗
+                      </span>
+                    )}
+                  </a>
+                ))}
+                <span class="post-description">{primary.data.description}</span>
+              </div>
+            </div>
+          );
+        })
       }
     </div>
   </section>
@@ -110,51 +147,56 @@ const posts = (await getCollection('posts')).sort(
 
   .post-card {
     display: grid;
-    grid-template-columns: 36px 1fr 20px;
+    grid-template-columns: 36px 1fr;
     gap: 16px;
     align-items: start;
     padding: 20px 0;
     border-bottom: 1px solid var(--line);
-    text-decoration: none;
-    transition: color 160ms ease;
-  }
-
-  .post-card:hover,
-  .post-card:focus-visible {
-    color: var(--signal);
   }
 
   .post-number {
     color: var(--muted);
-    font-family: 'DM Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
   }
 
-  .post-copy > * {
-    display: block;
-  }
-
   .post-meta {
-    display: flex !important;
+    display: flex;
     gap: 8px;
     margin-bottom: 8px;
   }
 
-  .post-card strong {
+  .post-title {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
     margin-bottom: 8px;
     font-size: 16px;
     font-weight: 600;
+    text-decoration: none;
+    transition: color 160ms ease;
+  }
+
+  .post-title:hover,
+  .post-title:focus-visible {
+    color: var(--signal);
+  }
+
+  .post-title-alt {
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 500;
   }
 
   .post-description {
+    display: block;
     color: var(--muted);
     font-size: 14px;
   }
 
   .post-arrow {
-    font-family: 'DM Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 16px;
-    text-align: right;
   }
 
   @media (max-width: 720px) {
