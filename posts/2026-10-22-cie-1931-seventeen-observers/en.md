@@ -125,7 +125,17 @@ XYZ is a cone in three dimensions: not a circle, and not a cone with a circular
 cross-section. The plane X + Y + Z = 1 cuts it in an irregular horseshoe,
 because the virtual primaries are not equally spaced in perception.
 
-![The colour cone and its non-circular section along X + Y + Z = 1](images/en/05-xyz.svg)
+<iframe
+  class="viz"
+  src="../../../viz/en/"
+  title="The XYZ cone, in three dimensions — interactive"
+  loading="lazy"
+></iframe>
+
+Turn the cone with the pointer, then move the wavelength slider: the ray tilts,
+the dot travels along the spectrum, and x and y change with it. Move only the
+brightness slider and the dot leaves the plane while x and y stay put, which is
+what it means for the projection to discard brightness.
 
 Normalising gives chromaticity coordinates `x = X / (X + Y + Z)` and
 `y = Y / (X + Y + Z)`.
@@ -276,7 +286,12 @@ treat the colours as indicative and the coordinates as exact. The satellite
 passbands follow the published Sentinel-2A MSI specification, rounded to whole
 nanometres, and the observer curves beside them are the same tabulated
 functions. Historical statements follow the CIE's own account of the standard
-and the early Wright and Guild papers.
+and the early Wright and Guild papers. The interactive cone is computed in the
+browser from that same table, committed with the site as
+`src/data/ciexyz31_1.csv`, sampled every five nanometres from 380 to 700 nm; it
+draws the cone as a slice through the ray space and puts the horseshoe exactly
+on the plane X + Y + Z = 1, so moving the brightness slider changes the point's
+distance from the origin and nothing about its x and y.
 
 ## Endnote: from the physical world to experience
 

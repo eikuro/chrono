@@ -1,0 +1,810 @@
+---
+// Interactive view of the CIE 1931 XYZ cone, one page per language.
+//
+// The 1931 post embeds this page in an iframe at `../../../viz/<lang>/`, so the
+// markup is rendered in the post's language at build time: no string swapping
+// after load, correct `lang` attribute, and a readable fallback without
+// scripting. Everything drawn is derived from the tabulated colour matching
+// functions at build time, so the picture cannot drift from the numbers.
+import csv from '../../data/ciexyz31_1.csv?raw';
+
+const SAMPLE_START = 380;
+const SAMPLE_END = 700;
+const SAMPLE_STEP = 5;
+
+const table = new Map<number, number[]>();
+for (const line of csv.split('\n')) {
+  if (!/^\d/.test(line)) continue;
+  const [nm, x, y, z] = line.trim().split(',').map(Number);
+  table.set(nm, [x, y, z]);
+}
+
+const samples: number[][] = [];
+for (let nm = SAMPLE_START; nm <= SAMPLE_END; nm += SAMPLE_STEP) {
+  const triple = table.get(nm);
+  if (!triple) throw new Error(`The colour matching table has no row for ${nm} nm`);
+  samples.push(triple.map((value) => Number(value.toPrecision(6))));
+}
+
+const TEXT = {
+  en: {
+    title: 'The XYZ cone and one slice through it',
+    subtitle: 'Every colour is a ray from the origin. The horseshoe is where the rays cross this plane.',
+    hint: 'Drag to orbit, scroll to zoom, arrow keys when focused',
+    scene:
+      'An interactive three-dimensional view of the CIE 1931 XYZ colour cone: the spectral locus as a curve in three dimensions, the cone swept from the origin through it, and the plane X + Y + Z = 1 cutting it in the horseshoe of the chromaticity diagram.',
+    wavelength: 'λ',
+    brightness: 'Brightness',
+    unchanged: 'x and y do not move',
+    cone: 'Cone',
+    gamut: 'sRGB gamut',
+    plane: 'Plane and grid',
+    reset: 'Reset view',
+    fallback:
+      'This figure is drawn by script. The next figure is the same section, flattened.',
+  },
+  zh: {
+    title: 'XYZ 颜色锥，以及它的一个截面',
+    subtitle: '每一种颜色都是原点射出的一条射线；马蹄形是这些射线穿过平面的落点。',
+    hint: '拖动旋转，滚轮缩放，聚焦后可用方向键',
+    scene:
+      'CIE 1931 XYZ 颜色锥的交互式三维视图：光谱轨迹作为三维空间中的一条曲线、从原点扫过它形成的锥面，以及把锥面截成色度图马蹄形的 X + Y + Z = 1 平面。',
+    wavelength: 'λ',
+    brightness: '亮度',
+    unchanged: 'x 与 y 不变',
+    cone: '颜色锥',
+    gamut: 'sRGB 色域',
+    plane: '平面与网格',
+    reset: '恢复视角',
+    fallback: '这张图由脚本绘制。下一张图把同一个截面摊平画了出来。',
+  },
+};
+
+export function getStaticPaths() {
+  return [{ params: { lang: 'en' } }, { params: { lang: 'zh' } }];
+}
+
+const lang = Astro.params.lang === 'zh' ? 'zh' : 'en';
+const t = TEXT[lang];
+const cmf = JSON.stringify({
+  start: SAMPLE_START,
+  step: SAMPLE_STEP,
+  samples,
+});
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="robots" content="noindex" />
+    <title>{t.title}</title>
+  </head>
+  <body>
+    <main class="widget">
+      <header class="head">
+        <div class="head-copy">
+          <h1>{t.title}</h1>
+          <p class="subtitle">{t.subtitle}</p>
+        </div>
+        <p class="readout">
+          <span class="row">
+            <span class="key">λ</span><span class="value" id="ro-nm"></span>
+          </span>
+          <span class="row">
+            <span class="key">x</span><span class="value" id="ro-x"></span>
+            <span class="key">y</span><span class="value" id="ro-y"></span>
+          </span>
+          <span class="row">
+            <span class="key">X</span><span class="value" id="ro-X"></span>
+            <span class="key">Y</span><span class="value" id="ro-Y"></span>
+            <span class="key">Z</span><span class="value" id="ro-Z"></span>
+          </span>
+          <span class="note" id="ro-note" hidden>{t.unchanged}</span>
+        </p>
+      </header>
+
+      <div class="stage">
+        <canvas id="scene" role="img" tabindex="0" aria-label={t.scene}></canvas>
+        <p class="hint">{t.hint}</p>
+      </div>
+
+      <div class="strip">
+        <label class="control">
+          <span class="control-name">{t.wavelength}</span>
+          <input id="wave" type="range" min="380" max="700" step="5" value="555" />
+          <output class="control-value" id="wave-value" for="wave"></output>
+        </label>
+        <label class="control">
+          <span class="control-name">{t.brightness}</span>
+          <input id="lum" type="range" min="40" max="240" step="2" value="100" />
+          <output class="control-value" id="lum-value" for="lum"></output>
+        </label>
+        <div class="switches">
+          <button type="button" id="t-cone" aria-pressed="true">
+            <span class="swatch cone"></span>{t.cone}
+          </button>
+          <button type="button" id="t-gamut" aria-pressed="false">
+            <span class="swatch gamut"></span>{t.gamut}
+          </button>
+          <button type="button" id="t-plane" aria-pressed="true">
+            <span class="swatch plane"></span>{t.plane}
+          </button>
+          <button type="button" id="t-reset" class="reset">{t.reset}</button>
+        </div>
+      </div>
+
+      <noscript><p class="fallback">{t.fallback}</p></noscript>
+    </main>
+
+    <script type="application/json" id="cmf" set:html={cmf}></script>
+    <script>
+      /* ------------------------------------------------------------ data -- */
+
+      const { start, step, samples } = JSON.parse(document.getElementById('cmf').textContent);
+
+      // Chromaticity of a triple: the point where its ray pierces X + Y + Z = 1.
+      const onPlane = ([X, Y, Z]) => {
+        const sum = X + Y + Z;
+        return [X / sum, Y / sum, Z / sum];
+      };
+
+      const locus = samples.map((triple, index) => ({
+        nm: start + index * step,
+        point: onPlane(triple),
+      }));
+
+      // sRGB primaries and the D65 white point, as published, in xy.
+      const SRGB = [[0.64, 0.33], [0.3, 0.6], [0.15, 0.06]].map(([x, y]) => [x, y, 1 - x - y]);
+      const D65 = [0.3127, 0.329, 1 - 0.3127 - 0.329];
+
+      /* ---------------------------------------------------- colour maths -- */
+
+      // The x̄, ȳ, z̄ triple of a wavelength, turned into a displayable hue. The
+      // triple is scaled to full brightness so every band reads as its own
+      // colour instead of a dim one, and clamped because sRGB is smaller than
+      // the spectrum.
+      const toSrgb = ([X, Y, Z]) => [
+        3.2406 * X - 1.5372 * Y - 0.4986 * Z,
+        -0.9689 * X + 1.8758 * Y + 0.0415 * Z,
+        0.0557 * X - 0.204 * Y + 1.057 * Z,
+      ];
+      const encode = (value) =>
+        value <= 0.0031308 ? 12.92 * value : 1.055 * Math.pow(value, 1 / 2.4) - 0.055;
+
+      function hueOf(index, alpha) {
+        const linear = toSrgb(samples[index]);
+        const peak = Math.max(...linear, 1e-6);
+        const [r, g, b] = linear.map((value) =>
+          Math.round(encode(Math.max(0, value / peak)) * 255),
+        );
+        return `rgba(${r} ${g} ${b} / ${alpha})`;
+      }
+
+      /* ------------------------------------------------------------ maths -- */
+
+      const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+      const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+      const scale = (a, k) => [a[0] * k, a[1] * k, a[2] * k];
+      const cross = (a, b) => [
+        a[1] * b[2] - a[2] * b[1],
+        a[2] * b[0] - a[0] * b[2],
+        a[0] * b[1] - a[1] * b[0],
+      ];
+      const unit = (a) => {
+        const length = Math.hypot(a[0], a[1], a[2]) || 1;
+        return [a[0] / length, a[1] / length, a[2] / length];
+      };
+      const DEG = Math.PI / 180;
+
+      /* ----------------------------------------------------------- scene -- */
+
+      const CONE = 1.55; // the cone is drawn past the plane; the plane is one slice
+      const AXIS = 1.2;
+      const PAD = 30;
+      const ORIGIN = [0, 0, 0];
+      const TARGET = [0.36, 0.42, 0.36];
+
+      const home = { yaw: 34 * DEG, pitch: 22 * DEG, zoom: 1 };
+      const view = { ...home };
+      const state = { cone: true, gamut: false, plane: true };
+      const INK = '#202522';
+      const MUTED = '#6b746f';
+      const SIGNAL = '#315cce';
+      const LINE = '#e2e6e3';
+
+      function basis() {
+        const cosPitch = Math.cos(view.pitch);
+        const dir = [
+          cosPitch * Math.cos(view.yaw),
+          Math.sin(view.pitch),
+          cosPitch * Math.sin(view.yaw),
+        ];
+        const right = unit(cross([0, 1, 0], dir));
+        return { dir, right, up: cross(dir, right) };
+      }
+
+      // Geometry is built in world space first so the view can be fitted to the
+      // points that actually exist, at any orientation and aspect ratio.
+      function build() {
+        const parts = [];
+        const tri = (layer, world, fill, stroke, width = 1) =>
+          parts.push({ type: 'tri', layer, world, fill, stroke, width });
+        const line = (layer, world, stroke, width = 1, dash = null) =>
+          parts.push({ type: 'line', layer, world, stroke, width, dash });
+        const label = (world, text, colour, dx, dy, anchor) =>
+          parts.push({ type: 'label', layer: 9, world, text, colour, dx, dy, anchor });
+
+        if (state.plane) {
+          tri(
+            0,
+            [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
+            'rgba(49 92 206 / 0.05)',
+            LINE,
+            1,
+          );
+          for (let k = 1; k < 8; k += 1) {
+            const a = k / 9;
+            line(0, [[a, 0, 1 - a], [a, 1 - a, 0]], 'rgba(107 116 111 / 0.22)', 1);
+            line(0, [[0, a, 1 - a], [1 - a, a, 0]], 'rgba(107 116 111 / 0.22)', 1);
+          }
+          label(D65, 'D65', MUTED, 0, -10, 'center');
+          parts.push({ type: 'dot', layer: 5, world: D65, radius: 3, fill: INK });
+        }
+
+        const outline = locus.map((entry) => entry.point);
+        if (state.cone) {
+          // Strips from the origin to consecutive wavelengths: the set of all
+          // non-negative mixtures of the spectral colours.
+          for (let i = 0; i < outline.length - 1; i += 1) {
+            const a = scale(outline[i], CONE);
+            const b = scale(outline[i + 1], CONE);
+            tri(1, [ORIGIN, a, b], hueOf(i, 0.1), null, 0);
+          }
+        }
+
+        if (state.gamut) {
+          const [r, g, b] = SRGB;
+          tri(2, [ORIGIN, r, g], 'rgba(32 37 34 / 0.05)', null, 0);
+          tri(2, [ORIGIN, g, b], 'rgba(32 37 34 / 0.05)', null, 0);
+          tri(2, [ORIGIN, b, r], 'rgba(32 37 34 / 0.05)', null, 0);
+          tri(2, [r, g, b], 'rgba(32 37 34 / 0.06)', 'rgba(32 37 34 / 0.45)', 1.2);
+        }
+
+        line(3, [...outline, outline[0]], SIGNAL, 2.4);
+
+        const axes = [
+          { to: [AXIS, 0, 0], name: 'X' },
+          { to: [0, AXIS, 0], name: 'Y' },
+          { to: [0, 0, AXIS], name: 'Z' },
+        ];
+        for (const axis of axes) {
+          line(4, [ORIGIN, axis.to], 'rgba(107 116 111 / 0.75)', 1.3, '5 5');
+          label(axis.to, axis.name, MUTED, 10, 4, 'start');
+        }
+
+        return parts;
+      }
+
+      // The selected wavelength: its ray, its point on the plane, and a second
+      // point at the chosen brightness. Both points share one chromaticity.
+      function highlight() {
+        const parts = [];
+        const nm = Number(wave.value);
+        const index = Math.round((nm - start) / step);
+        const point = locus[Math.min(Math.max(index, 0), locus.length - 1)].point;
+        const brightness = Number(lum.value) / 100;
+        const lifted = scale(point, brightness);
+        const tip = scale(point, Math.max(CONE, brightness));
+
+        parts.push({
+          type: 'line',
+          layer: 6,
+          world: [ORIGIN, tip],
+          stroke: 'rgba(32 37 34 / 0.55)',
+          width: 1.2,
+          dash: '4 4',
+        });
+        parts.push({ type: 'dot', layer: 7, world: point, radius: 5, fill: SIGNAL });
+        parts.push({ type: 'dot', layer: 7, world: lifted, radius: 4.5, fill: '#b4402c' });
+        return parts;
+      }
+
+      /* ------------------------------------------------------------ paint -- */
+
+      const canvas = document.querySelector<HTMLCanvasElement>('#scene');
+      const ctx = canvas.getContext('2d');
+      const stage = canvas.parentElement;
+      const wave = document.querySelector<HTMLInputElement>('#wave');
+      const lum = document.querySelector<HTMLInputElement>('#lum');
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+      let width = 1;
+      let height = 1;
+
+      // Every point a part is drawn from, whether it holds one or many.
+      const pointsOf = (part) => (Array.isArray(part.world[0]) ? part.world : [part.world]);
+
+      function project(point, cam, fit, centre) {
+        const offset = sub(point, TARGET);
+        return [
+          width / 2 + (dot(offset, cam.right) - centre.u) * fit,
+          height / 2 - (dot(offset, cam.up) - centre.v) * fit,
+          dot(offset, cam.dir),
+        ];
+      }
+
+      // The scene is fitted to the points that are actually drawn, not to a
+      // guessed box: the camera turned to any angle still lands inside the
+      // canvas at the largest scale that fits.
+      function bounds(cam, parts) {
+        const box = { minU: 1e9, maxU: -1e9, minV: 1e9, maxV: -1e9 };
+        for (const part of parts) {
+          for (const point of pointsOf(part)) {
+            const offset = sub(point, TARGET);
+            const u = dot(offset, cam.right);
+            const v = dot(offset, cam.up);
+            box.minU = Math.min(box.minU, u);
+            box.maxU = Math.max(box.maxU, u);
+            box.minV = Math.min(box.minV, v);
+            box.maxV = Math.max(box.maxV, v);
+          }
+        }
+        const centre = { u: (box.minU + box.maxU) / 2, v: (box.minV + box.maxV) / 2 };
+        const spanX = Math.max((box.maxU - box.minU) / 2, 1e-6);
+        const spanY = Math.max((box.maxV - box.minV) / 2, 1e-6);
+        const fit =
+          Math.min((width / 2 - PAD) / spanX, (height / 2 - PAD) / spanY) * view.zoom;
+        return { centre, fit };
+      }
+
+      function draw() {
+        const cam = basis();
+        const parts = [...build(), ...highlight()];
+        const { centre, fit } = bounds(cam, parts);
+
+        // Far layers first; inside a translucent layer, far strips first too.
+        const ordered = parts
+          .map((part) => {
+            const points = pointsOf(part);
+            const depth = points.reduce(
+              (sum, point) => sum + dot(sub(point, TARGET), cam.dir),
+              0,
+            );
+            return { part, depth: depth / points.length };
+          })
+          .sort((a, b) => a.part.layer - b.part.layer || a.depth - b.depth);
+
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, width, height);
+        ctx.lineJoin = 'round';
+
+        for (const { part } of ordered) {
+          if (part.type === 'label') {
+            const [sx, sy] = project(part.world, cam, fit, centre);
+            ctx.fillStyle = part.colour;
+            ctx.font = "500 11px 'IBM Plex Mono', ui-monospace, monospace";
+            ctx.textAlign = part.anchor;
+            ctx.fillText(part.text, sx + part.dx, sy + part.dy);
+            continue;
+          }
+
+          if (part.type === 'dot') {
+            const [sx, sy] = project(part.world, cam, fit, centre);
+            ctx.beginPath();
+            ctx.arc(sx, sy, part.radius, 0, Math.PI * 2);
+            ctx.fillStyle = part.fill;
+            ctx.fill();
+            continue;
+          }
+
+          ctx.beginPath();
+          part.world.forEach((point, index) => {
+            const [sx, sy] = project(point, cam, fit, centre);
+            if (index === 0) ctx.moveTo(sx, sy);
+            else ctx.lineTo(sx, sy);
+          });
+          if (part.type === 'tri') ctx.closePath();
+          if (part.fill) {
+            ctx.fillStyle = part.fill;
+            ctx.fill();
+          }
+          if (part.stroke) {
+            ctx.setLineDash(part.dash ? part.dash.split(' ').map(Number) : []);
+            ctx.strokeStyle = part.stroke;
+            ctx.lineWidth = part.width ?? 1;
+            ctx.stroke();
+            ctx.setLineDash([]);
+          }
+        }
+      }
+
+      /* ----------------------------------------------------------- resize -- */
+
+      function resize() {
+        const box = stage.getBoundingClientRect();
+        width = Math.max(1, Math.round(box.width));
+        height = Math.max(1, Math.round(box.height - 22));
+        canvas.width = Math.round(width * dpr);
+        canvas.height = Math.round(height * dpr);
+        canvas.style.width = `${width}px`;
+        canvas.style.height = `${height}px`;
+        draw();
+      }
+
+      new ResizeObserver(resize).observe(stage);
+
+      /* ------------------------------------------------------------ input -- */
+
+      let dragging = null;
+
+      canvas.addEventListener('pointerdown', (event) => {
+        dragging = { x: event.clientX, y: event.clientY };
+        canvas.setPointerCapture(event.pointerId);
+        canvas.focus();
+      });
+
+      canvas.addEventListener('pointermove', (event) => {
+        if (!dragging) return;
+        view.yaw -= (event.clientX - dragging.x) * 0.008;
+        view.pitch += (event.clientY - dragging.y) * 0.008;
+        view.pitch = Math.max(-85 * DEG, Math.min(85 * DEG, view.pitch));
+        dragging = { x: event.clientX, y: event.clientY };
+        draw();
+      });
+
+      const release = () => {
+        dragging = null;
+      };
+      canvas.addEventListener('pointerup', release);
+      canvas.addEventListener('pointercancel', release);
+
+      canvas.addEventListener(
+        'wheel',
+        (event) => {
+          event.preventDefault();
+          view.zoom = Math.max(0.6, Math.min(2.6, view.zoom * (event.deltaY > 0 ? 0.94 : 1.06)));
+          draw();
+        },
+        { passive: false },
+      );
+
+      canvas.addEventListener('keydown', (event) => {
+        const keys = {
+          ArrowLeft: () => (view.yaw -= 5 * DEG),
+          ArrowRight: () => (view.yaw += 5 * DEG),
+          ArrowUp: () => (view.pitch = Math.min(85 * DEG, view.pitch + 5 * DEG)),
+          ArrowDown: () => (view.pitch = Math.max(-85 * DEG, view.pitch - 5 * DEG)),
+          '+': () => (view.zoom = Math.min(2.6, view.zoom * 1.1)),
+          '-': () => (view.zoom = Math.max(0.6, view.zoom / 1.1)),
+          Home: () => Object.assign(view, home),
+        };
+        const action = keys[event.key];
+        if (!action) return;
+        event.preventDefault();
+        action();
+        draw();
+      });
+
+      function paintToggle(button) {
+        const id = button.id.replace('t-', '');
+        if (id in state) button.setAttribute('aria-pressed', String(state[id]));
+      }
+
+      for (const [key, buttonId] of [
+        ['cone', 't-cone'],
+        ['gamut', 't-gamut'],
+        ['plane', 't-plane'],
+      ]) {
+        const button = document.querySelector<HTMLButtonElement>(`#${buttonId}`);
+        button.addEventListener('click', () => {
+          state[key] = !state[key];
+          paintToggle(button);
+          draw();
+        });
+      }
+
+      document.querySelector<HTMLButtonElement>('#t-reset').addEventListener('click', () => {
+        Object.assign(view, home);
+        draw();
+      });
+
+      /* ---------------------------------------------------------- readout -- */
+
+      const out = {
+        nm: document.getElementById('ro-nm'),
+        x: document.getElementById('ro-x'),
+        y: document.getElementById('ro-y'),
+        X: document.getElementById('ro-X'),
+        Y: document.getElementById('ro-Y'),
+        Z: document.getElementById('ro-Z'),
+        note: document.getElementById('ro-note'),
+        waveValue: document.getElementById('wave-value'),
+        lumValue: document.getElementById('lum-value'),
+      };
+
+      function readout() {
+        const nm = Number(wave.value);
+        const brightness = Number(lum.value) / 100;
+        const index = Math.round((nm - start) / step);
+        const [x, y, z] = locus[Math.min(Math.max(index, 0), locus.length - 1)].point;
+
+        out.nm.textContent = `${nm} nm`;
+        out.x.textContent = x.toFixed(4);
+        out.y.textContent = y.toFixed(4);
+        out.X.textContent = (x * brightness).toFixed(3);
+        out.Y.textContent = (y * brightness).toFixed(3);
+        out.Z.textContent = (z * brightness).toFixed(3);
+        out.waveValue.textContent = `${nm}`;
+        out.lumValue.textContent = `×${brightness.toFixed(2)}`;
+        out.note.hidden = Math.abs(brightness - 1) < 0.001;
+      }
+
+      const update = () => {
+        readout();
+        draw();
+      };
+      wave.addEventListener('input', update);
+      lum.addEventListener('input', update);
+
+      readout();
+      resize();
+    </script>
+
+    <style is:global>
+      @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+
+      :root {
+        --ink: #202522;
+        --muted: #6b746f;
+        --paper: #ffffff;
+        --paper-deep: #f1f3f2;
+        --signal: #315cce;
+        --line: #e2e6e3;
+        color: var(--ink);
+        background: var(--paper);
+        font-family: 'IBM Plex Sans', 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans SC', sans-serif;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100%;
+      }
+
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+
+      .widget {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        padding: 18px 22px 14px;
+        gap: 8px;
+      }
+
+      .head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+      }
+
+      .head-copy h1 {
+        margin: 0;
+        font-size: 17px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+
+      .subtitle {
+        margin: 3px 0 0;
+        max-width: 46ch;
+        color: var(--muted);
+        font-size: 12.5px;
+        line-height: 1.45;
+      }
+
+      .readout {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+        margin: 0;
+        color: var(--ink);
+        font-family: 'IBM Plex Mono', ui-monospace, monospace;
+        font-size: 10.5px;
+        text-align: right;
+        white-space: nowrap;
+      }
+
+      .readout .row {
+        display: flex;
+        justify-content: flex-end;
+        gap: 6px;
+      }
+
+      .readout .key {
+        color: var(--muted);
+      }
+
+      .readout .value {
+        min-width: 3.6em;
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .readout .note {
+        color: var(--muted);
+        font-size: 10px;
+      }
+
+      .stage {
+        position: relative;
+        flex: 1 1 auto;
+        min-height: 0;
+      }
+
+      canvas {
+        display: block;
+        cursor: grab;
+        touch-action: none;
+      }
+
+      canvas:active {
+        cursor: grabbing;
+      }
+
+      canvas:focus-visible {
+        outline: 2px solid var(--signal);
+        outline-offset: 2px;
+      }
+
+      .hint {
+        position: absolute;
+        inset: auto 0 0 0;
+        margin: 0;
+        color: var(--muted);
+        font-family: 'IBM Plex Mono', ui-monospace, monospace;
+        font-size: 9.5px;
+        text-align: center;
+      }
+
+      .strip {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px 18px;
+        padding-top: 10px;
+        border-top: 1px solid var(--line);
+      }
+
+      .control {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex: 1 1 180px;
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      .control-name {
+        font-family: 'IBM Plex Mono', ui-monospace, monospace;
+        white-space: nowrap;
+      }
+
+      .control-value {
+        min-width: 3.4em;
+        color: var(--ink);
+        font-family: 'IBM Plex Mono', ui-monospace, monospace;
+        font-size: 10.5px;
+        text-align: right;
+      }
+
+      input[type='range'] {
+        flex: 1 1 auto;
+        min-width: 0;
+        height: 18px;
+        margin: 0;
+        accent-color: var(--signal);
+        cursor: pointer;
+      }
+
+      .switches {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .switches button {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 9px;
+        border: 1px solid var(--line);
+        border-radius: 2px;
+        background: transparent;
+        color: var(--muted);
+        font-family: inherit;
+        font-size: 11px;
+        cursor: pointer;
+      }
+
+      .switches button[aria-pressed='true'] {
+        border-color: rgba(49 92 206 / 0.45);
+        background: rgba(49 92 206 / 0.06);
+        color: var(--ink);
+      }
+
+      .switches button:focus-visible {
+        outline: 2px solid var(--signal);
+        outline-offset: 1px;
+      }
+
+      .swatch {
+        width: 8px;
+        height: 8px;
+        border: 1px solid currentColor;
+      }
+
+      .swatch.cone {
+        border: none;
+        background: linear-gradient(90deg, #6a5ccc, #3aa35a, #d24b3a);
+      }
+
+      .swatch.gamut {
+        border: none;
+        background: rgba(32 37 34 / 0.35);
+      }
+
+      .swatch.plane {
+        border-color: rgba(49 92 206 / 0.5);
+        background: rgba(49 92 206 / 0.12);
+      }
+
+      .reset {
+        border-style: dashed !important;
+      }
+
+      .fallback {
+        margin: 12px 0 0;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      @media (max-width: 560px) {
+        .widget {
+          padding: 14px 14px 10px;
+        }
+
+        .head {
+          flex-direction: column;
+          gap: 6px;
+        }
+
+        .readout {
+          flex-direction: row;
+          flex-wrap: wrap;
+          gap: 2px 12px;
+          text-align: left;
+        }
+
+        .readout .row {
+          justify-content: flex-start;
+        }
+
+        .subtitle {
+          font-size: 12px;
+        }
+      }
+    </style>
+  </body>
+</html>

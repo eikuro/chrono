@@ -207,6 +207,15 @@ const alternates = variants.map((variant: Post) => ({
     margin: 32px auto 12px;
   }
 
+  .prose :global(iframe.viz) {
+    display: block;
+    width: 100%;
+    height: 600px;
+    margin: 32px auto 12px;
+    border: 1px solid var(--line);
+    background: var(--paper);
+  }
+
   .prose :global(pre) {
     overflow-x: auto;
     margin: 28px 0;
@@ -240,6 +249,10 @@ const alternates = variants.map((variant: Post) => ({
 
     .back-link {
       margin-bottom: 40px;
+    }
+
+    .prose :global(iframe.viz) {
+      height: 520px;
     }
   }
 </style>
