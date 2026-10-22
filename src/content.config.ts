@@ -9,6 +9,9 @@ const posts = defineCollection({
   schema: z.object({
     date: z.coerce.date(),
     description: z.string(),
+    // A finished post that is held back keeps its history and its figures; it
+    // is excluded from the archive and from its own route until the flag clears.
+    draft: z.boolean().default(false),
     lang: z.enum(['en', 'zh']).default('en'),
     name: z.string(),
     tags: z.array(z.string()).default([]),

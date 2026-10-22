@@ -6,6 +6,7 @@ tags:
   - Architecture
 translationKey: one-workspace-two-shapes
 date: 2026-09-18
+draft: true
 description: How one authored copy of every shared file, a configuration compiler, and relative symlinks give a family of independent repositories the consistency of a monorepo and the boundaries of separate components — whichever folder is open.
 ---
 

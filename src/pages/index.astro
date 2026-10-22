@@ -1,8 +1,6 @@
 ---
-import { getCollection, type CollectionEntry } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-
-type Post = CollectionEntry<'posts'>;
+import { publishedPosts, type Post } from '../lib/posts';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const postHref = (entry: Post) => `${base}/posts/${entry.id}/`;
@@ -10,7 +8,7 @@ const languageOrder = (entry: Post) => (entry.data.lang === 'en' ? 0 : 1);
 
 // One row per work: language variants of the same post share a translation key,
 // so the archive lists each title once and links each language on its own.
-const posts = await getCollection('posts');
+const posts = await publishedPosts();
 const groups = new Map<string, Post[]>();
 
 for (const post of posts) {
@@ -30,15 +28,16 @@ const works = [...groups.values()]
 ---
 
 <BaseLayout
-  title="Engineering notes"
-  description="Engineering notes about the systems, tools, and decisions behind Workspace."
+  title="Case studies"
+  description="Case studies in engineering judgement: where a boundary belongs, what a model should refuse to cover, and what evidence makes a decision safe to build on."
 >
   <section class="intro">
-    <p class="eyebrow">Field notes / 001</p>
-    <h1>Small systems,<br /><em>carefully made.</em></h1>
+    <h1>Interfaces that<br /><em>outlive their inputs.</em></h1>
     <p class="intro-copy">
-      A running record of the choices behind Workspace: its repositories, tooling,
-      and the quiet machinery that keeps them moving together.
+      A good interface keeps working after the facts that produced it have changed. These are
+      case studies of how that happens in practice: where a boundary gets drawn, what a model
+      deliberately leaves out, and what evidence makes the result safe to build on. The first is a
+      colour standard from 1931 that still decides what your screen shows.
     </p>
   </section>
 

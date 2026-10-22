@@ -4,21 +4,22 @@ type: index
 description: Chrono index, repository notes, and reading order
 ---
 
-# Workspace Chrono
+# Chrono
 
-Engineering write-ups about how this workspace is built and operated: the
-architecture decisions behind its boundaries, the tooling that materialises
-configuration, and the practices that keep a family of independent
-repositories consistent.
+Case studies of engineering judgement: where a boundary belongs, what a model
+should refuse to cover, and what evidence makes a decision safe to build on.
 
-Read Chrono online at <https://organisation.github.io/chrono/>.
+Read Chrono online at <https://eikuro.github.io/chrono/>.
 
 Posts are one Markdown file each under `posts/`.
 
-| Date | Post | Summary |
-| --- | --- | --- |
-| 2026-10-22 | [Seventeen observers, one standard](posts/2026-10-22-cie-1931-seventeen-observers/en.md) | The 1931 CIE colour-matching experiment as a case study in compressing deep research into a small, durable interface. Also in [Chinese](posts/2026-10-22-cie-1931-seventeen-observers/zh.md). |
-| 2026-09-18 | [One workspace, two shapes](posts/2026-09-18-one-workspace-two-shapes.md) | How shared templates, Porter materialisation, and relative symlinks let this family of repositories open as one workspace or as any single member with identical tooling. |
+- 2026-10-22 — [Seventeen observers, one standard](posts/2026-10-22-cie-1931-seventeen-observers/en.md)
+  ([中文](posts/2026-10-22-cie-1931-seventeen-observers/zh.md)): the 1931 CIE
+  colour-matching experiment as a case study in compressing deep research into a
+  small, durable interface.
+
+`One workspace, two shapes` is held back (`draft: true`) while its content is
+polished; clear the flag to publish it again.
 
 ## Repository Notes
 
@@ -30,6 +31,9 @@ Posts are one Markdown file each under `posts/`.
 - A folder under `posts/` whose name starts with an underscore is staging
   material: the collection loader skips it, so a raw draft cannot fail the
   schema or reach the archive.
+- A finished post that needs more work carries `draft: true`. The schema defaults
+  it to `false`, and `src/lib/posts.ts` is the single place that filters drafts
+  out, so neither the archive nor a post route can publish one by omission.
 - This repository is a Porter consumer like its siblings: `porter.yaml`
   declares `config: ../tabjs` and links the shared spelling, lint, editor, and
   VS Code configuration; `agents: ../.agents` mounts the shared agent tree.
