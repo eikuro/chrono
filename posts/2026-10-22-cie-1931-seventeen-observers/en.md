@@ -225,9 +225,36 @@ difference becomes visible. That is the second consequence from the top of this
 article, used on purpose: since the compression is not invertible, the remaining
 channels are spent on discrimination rather than on looking right.
 
+Once the number has stopped being red, green, or blue, a second question
+appears, and this one has no physics in it. An index such as NDVI is one number
+per pixel — the normalised difference between the near-infrared and red bands, a
+quantity of vegetation rather than a colour. Turning it into an image means
+inventing a scale, and the scale is an instrument in its own right: the reader
+will judge "more vegetation" by eye, so lightness has to rise with the index and
+nothing else may compete with it.
+
+![One index, three colour ramps](images/en/13-ndvi-ramps.svg)
+
+The same field, the same index, three mappings. The rainbow reads well at a
+glance and fails on inspection: its CIE lightness reverses four times across the
+scale, so a patch can be brighter than one carrying more vegetation, and in
+greyscale, or for a reader with deuteranopia, the ordering is gone.
+Interpolating green to brown in display sRGB keeps the order but spends 22 of
+the 100 lightness units on the whole range, so nearly everything reads as one
+mid-tone and the discrimination has to happen in hue alone. The third ramp is
+written in OKLCH, the polar form of OKLab: set L, reduce C until each entry fits
+inside sRGB, sweep hue from ochre to green. Lightness then moves once, through
+66 units, at one or two units per step.
+
+None of that touches the physics. The reflectance, the atmosphere model, the
+matrix, and the tone curve are unchanged. The only difference is whether the
+last mapping, from number to colour, was designed as a perceptual scale or
+inherited as a palette.
+
 Almost every step is a choice: the atmosphere model, the libraries the matrix is
-fitted against, the gamut policy, the tone curve. Each has a literature of
-disagreement behind it. The one that is not a choice is the definition of XYZ
+fitted against, the gamut policy, the tone curve, the ramp that carries an index
+to the screen. Each has a literature of disagreement behind it. The one that is
+not a choice is the definition of XYZ
 and of the observer it refers to, and it is also the one nobody renegotiates
 when the instrument changes. A satellite is temporary by design. The observer it
 is calibrated against has now outlived four generations of detector.
@@ -285,7 +312,13 @@ coordinates in sRGB, which cannot show the full horseshoe at full saturation, so
 treat the colours as indicative and the coordinates as exact. The satellite
 passbands follow the published Sentinel-2A MSI specification, rounded to whole
 nanometres, and the observer curves beside them are the same tabulated
-functions. Historical statements follow the CIE's own account of the standard
+functions. The colour-ramp comparison compares mappings, not data: the index
+field is synthetic, generated with the spread of a mid-season agricultural
+scene, while the three ramps and the L\* curves beneath them are computed — HSV
+for the rainbow, linear interpolation for the display-RGB pair, and OKLCH
+through Björn Ottosson's OKLab matrices with chroma reduced until every entry
+fits inside sRGB. Each L\* value is the CIE 1976 lightness of the bytes actually
+drawn. Historical statements follow the CIE's own account of the standard
 and the early Wright and Guild papers. The interactive cone is computed in the
 browser from that same table, committed with the site as
 `src/data/ciexyz31_1.csv`, sampled every five nanometres from 380 to 700 nm; it
